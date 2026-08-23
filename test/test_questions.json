@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "question": "How many days do I have to report a change of address?",
+        "expected_clause": "§4.3.2",
+        "expected_type": "answer"
+    },
+    {
+        "id": 2,
+        "question": "What is the resource limit for eligibility?",
+        "expected_clause": "§2.4.1",
+        "expected_type": "answer"
+    },
+    {
+        "id": 3,
+        "question": "Can a 17-year-old apply for assistance?",
+        "expected_clause": "§2.3.1",
+        "expected_type": "answer"
+    },
+    {
+        "id": 4,
+        "question": "How long does the Department have to determine an application?",
+        "expected_clause": "§8.3.1",
+        "expected_type": "answer"
+    },
+    {
+        "id": 5,
+        "question": "When must requested evidence be supplied?",
+        "expected_clause": "§8.2.3",
+        "expected_type": "answer"
+    },
+    {
+        "id": 6,
+        "question": "How long can temporary medical absence continue?",
+        "expected_clause": "§3.2.2",
+        "expected_type": "answer"
+    },
+    {
+        "id": 7,
+        "question": "What is the monthly earnings disregard?",
+        "expected_clause": "§6.4.1",
+        "expected_type": "answer"
+    },
+    {
+        "id": 8,
+        "question": "Do childcare vouchers increase eligibility?",
+        "expected_clause": null,
+        "expected_type": "refuse"
+    },
+    {
+        "id": 9,
+        "question": "Can I receive transport allowance under this program?",
+        "expected_clause": null,
+        "expected_type": "refuse"
+    },
+    {
+        "id": 10,
+        "question": "How many days do I have to report a change of circumstances?",
+        "expected_clause": "§4.3.2 & §9.1.4",
+        "expected_type": "ambiguous"
+    }
+]

@@ -17,9 +17,7 @@ DEADLINE_PATTERN = re.compile(
 
 
 def extract_deadline(text: str):
-    """
-    Extract an explicit reporting deadline from a clause.
-    """
+    """Extract an explicit reporting deadline from a clause."""
 
     match = DEADLINE_PATTERN.search(text)
 
@@ -44,8 +42,8 @@ def extract_deadline(text: str):
 
 def is_change_reporting_clause(text: str) -> bool:
     """
-    Determine whether a clause concerns reporting a
-    change of circumstances.
+    Determine whether a clause contains a reporting
+    deadline relating to a change of circumstances.
     """
 
     text = text.lower()
@@ -74,11 +72,70 @@ def is_change_reporting_clause(text: str) -> bool:
     )
 
 
-def detect_contradiction(results: List[Dict]) -> Dict:
+def question_requests_general_change_reporting(question: str) -> bool:
     """
-    Detect explicit contradictions between policy
-    reporting deadlines.
+    Return True only when the user is asking about
+    the general reporting requirement for a change
+    of circumstances.
+
+    Address-specific questions should not automatically
+    trigger the contradiction between §4.3.2 and §9.1.4.
     """
+
+    question = question.lower()
+
+    # Explicit "change of circumstances" wording.
+    if "change of circumstances" in question:
+        return True
+
+    # General change-reporting questions.
+    has_reporting = (
+        "report" in question
+        or "notify" in question
+    )
+
+    has_general_change = (
+        "change" in question
+        and "address" not in question
+        and "income" not in question
+        and "household" not in question
+    )
+
+    return has_reporting and has_general_change
+
+
+def detect_contradiction(
+    results: List[Dict],
+    question: str = ""
+) -> Dict:
+    """
+    Detect explicit contradictions between reporting deadlines.
+
+    The contradiction is only considered relevant when the user's
+    question asks about the general change-of-circumstances
+    reporting requirement.
+
+    This prevents the intentional conflict between §4.3.2 and
+    §9.1.4 from incorrectly blocking address-specific questions.
+    """
+
+    # ---------------------------------------------------------
+    # IMPORTANT:
+    # Do not trigger the contradiction for address-specific
+    # questions such as:
+    #
+    # "How many days do I have to report a change of address?"
+    #
+    # The conflict is relevant to the broader
+    # "change of circumstances" question.
+    # ---------------------------------------------------------
+
+    if not question_requests_general_change_reporting(question):
+        return {
+            "contradiction": False,
+            "clauses": [],
+            "details": {},
+        }
 
     deadline_clauses = []
 
@@ -101,15 +158,18 @@ def detect_contradiction(results: List[Dict]) -> Dict:
             "unit": deadline["unit"],
         })
 
+    # Compare explicit deadlines.
     for i in range(len(deadline_clauses)):
         for j in range(i + 1, len(deadline_clauses)):
 
             first = deadline_clauses[i]
             second = deadline_clauses[j]
 
+            # Different units are not automatically contradictory.
             if first["unit"] != second["unit"]:
                 continue
 
+            # Same deadline = no contradiction.
             if first["days"] == second["days"]:
                 continue
 
