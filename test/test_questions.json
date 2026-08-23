@@ -37,26 +37,38 @@
     },
     {
         "id": 7,
-        "question": "What is the monthly earnings disregard?",
+        "question": "What is the monthly earnings disregard for a claim in February 2026?",
         "expected_clause": "§6.4.1",
         "expected_type": "answer"
     },
     {
         "id": 8,
+        "question": "What is the monthly earnings disregard for a claim in April 2026?",
+        "expected_clause": "§6.4.1 (as amended by Amdt 2026-01 ¶1.1)",
+        "expected_type": "answer"
+    },
+    {
+        "id": 9,
         "question": "Do childcare vouchers increase eligibility?",
         "expected_clause": null,
         "expected_type": "refuse"
     },
     {
-        "id": 9,
+        "id": 10,
         "question": "Can I receive transport allowance under this program?",
         "expected_clause": null,
         "expected_type": "refuse"
     },
     {
-        "id": 10,
-        "question": "How many days do I have to report a change of circumstances?",
+        "id": 11,
+        "question": "How many days do I have to report a change of circumstances occurring in February 2026?",
         "expected_clause": "§4.3.2 & §9.1.4",
-        "expected_type": "ambiguous"
+        "expected_type": "contradiction"
+    },
+    {
+        "id": 12,
+        "question": "How many days do I have to report a change of circumstances occurring in April 2026?",
+        "expected_clause": "§4.3.2 (as amended by Amdt 2026-01 ¶2.1)",
+        "expected_type": "answer"
     }
 ]

@@ -1,6 +1,9 @@
 import re
-from typing import List, Dict
+import datetime
+from typing import List, Dict, Optional, Union
 
+# pyrefly: ignore [missing-import]
+from temporal import extract_date_from_query, parse_date, is_post_amendment
 
 DEADLINE_PATTERN = re.compile(
     r"\b(?:within|no later than|not later than)\s+"
@@ -18,9 +21,7 @@ DEADLINE_PATTERN = re.compile(
 
 def extract_deadline(text: str):
     """Extract an explicit reporting deadline from a clause."""
-
     match = DEADLINE_PATTERN.search(text)
-
     if not match:
         return None
 
@@ -45,7 +46,6 @@ def is_change_reporting_clause(text: str) -> bool:
     Determine whether a clause contains a reporting
     deadline relating to a change of circumstances.
     """
-
     text = text.lower()
 
     has_reporting_language = (
@@ -77,18 +77,14 @@ def question_requests_general_change_reporting(question: str) -> bool:
     Return True only when the user is asking about
     the general reporting requirement for a change
     of circumstances.
-
-    Address-specific questions should not automatically
-    trigger the contradiction between §4.3.2 and §9.1.4.
     """
-
     question = question.lower()
 
-    # Explicit "change of circumstances" wording.
+    # Explicit "change of circumstances" wording
     if "change of circumstances" in question:
         return True
 
-    # General change-reporting questions.
+    # General change-reporting questions
     has_reporting = (
         "report" in question
         or "notify" in question
@@ -106,29 +102,32 @@ def question_requests_general_change_reporting(question: str) -> bool:
 
 def detect_contradiction(
     results: List[Dict],
-    question: str = ""
+    question: str = "",
+    claim_date: Optional[Union[str, datetime.date]] = None
 ) -> Dict:
     """
     Detect explicit contradictions between reporting deadlines.
 
-    The contradiction is only considered relevant when the user's
-    question asks about the general change-of-circumstances
-    reporting requirement.
-
-    This prevents the intentional conflict between §4.3.2 and
-    §9.1.4 from incorrectly blocking address-specific questions.
+    Temporal resolution:
+    - Pre-March 1, 2026: §4.3.2 (10 days) and §9.1.4 (14 days) conflict, triggering CONTRADICTION.
+    - Post-March 1, 2026: Amendment No. 2026-01 ¶2.1 & ¶2.2 align both to 14 days, resolving the conflict.
     """
+    if isinstance(claim_date, str):
+        target_date = parse_date(claim_date)
+    else:
+        target_date = claim_date
 
-    # ---------------------------------------------------------
-    # IMPORTANT:
-    # Do not trigger the contradiction for address-specific
-    # questions such as:
-    #
-    # "How many days do I have to report a change of address?"
-    #
-    # The conflict is relevant to the broader
-    # "change of circumstances" question.
-    # ---------------------------------------------------------
+    if target_date is None:
+        target_date = extract_date_from_query(question)
+
+    # Post-March 1, 2026: Amendment 2026-01 resolves the contradiction explicitly
+    if is_post_amendment(target_date):
+        return {
+            "contradiction": False,
+            "clauses": [],
+            "details": {},
+            "resolved_by_amendment": True
+        }
 
     if not question_requests_general_change_reporting(question):
         return {
@@ -140,6 +139,10 @@ def detect_contradiction(
     deadline_clauses = []
 
     for result in results:
+        # Ignore amendment clauses when assessing pre-amendment conflict
+        if result.get("source") == "amendment-2026-01" or "Amdt 2026-01" in result.get("clause_id", ""):
+            continue
+
         text = result["text"]
 
         if not is_change_reporting_clause(text):
@@ -158,18 +161,17 @@ def detect_contradiction(
             "unit": deadline["unit"],
         })
 
-    # Compare explicit deadlines.
+    # Compare explicit deadlines
     for i in range(len(deadline_clauses)):
         for j in range(i + 1, len(deadline_clauses)):
-
             first = deadline_clauses[i]
             second = deadline_clauses[j]
 
-            # Different units are not automatically contradictory.
+            # Different units are not automatically contradictory
             if first["unit"] != second["unit"]:
                 continue
 
-            # Same deadline = no contradiction.
+            # Same deadline = no contradiction
             if first["days"] == second["days"]:
                 continue
 
@@ -180,10 +182,8 @@ def detect_contradiction(
                     second["clause_id"],
                 ],
                 "details": {
-                    first["clause_id"]:
-                        f"{first['days']} {first['unit']}",
-                    second["clause_id"]:
-                        f"{second['days']} {second['unit']}",
+                    first["clause_id"]: f"{first['days']} {first['unit']}",
+                    second["clause_id"]: f"{second['days']} {second['unit']}",
                 },
             }
 
@@ -196,7 +196,6 @@ def detect_contradiction(
 
 def contradiction_message(clauses: List[str]) -> str:
     """Return the supervisor-review message."""
-
     return (
         f"The policy manual contains conflicting provisions "
         f"({clauses[0]} and {clauses[1]}). "

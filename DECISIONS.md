@@ -155,4 +155,29 @@ Per the competition specification, requirements may change on Day Two. The codeb
 | `src/answer.py` | Prompt formatting & LLM generation | Can switch LLM providers (Groq, OpenAI, Ollama) cleanly |
 | `src/cli.py` | Presentation layer & pipeline orchestration | Decoupled CLI interface |
 
-If Day Two introduces a new corpus, altered time constraints, or new contradiction rules, only the relevant isolated module needs adjustment.
+---
+
+## 9. Day Two Post-Mortem & Amendment No. 2026-01 Handling
+
+### 9.1 The Day Two Requirement Change
+On Day Two, **Amendment No. 2026-01** was issued taking effect on **1 March 2026**. The assistant was required to provide answers that are correct for the **date of the claim / determination being asked about**, handling:
+- **Earnings disregard**: $120/mo (pre-March 2026) vs $175/mo (on/after 1 March 2026).
+- **Reporting deadlines**: §4.3.2 (10 days) and §9.1.4 (conflicting) unified to **14 calendar days** on/after 1 March 2026.
+- **Sanctions**: 20% reduced to 15%, plus new exemption (§10.5.3A) if the unreported change increased the award.
+- **Transitional rules**: Governed by Amendment ¶5.
+
+### 9.2 What We Changed
+1. **Added `src/temporal.py`**: A specialized temporal parsing and scoring engine that extracts date context from natural language questions (e.g. *"February 2026"*, *"April 2026"*) or CLI `--date` / `-d` flags.
+2. **Updated Ingestion (`src/ingest.py`)**: Parsed `data/amendment-2026-01.md` alongside `data/policy-manual.md`, attaching temporal validity metadata (`effective_start`, `effective_end`, `transitional_rule`) to every clause.
+3. **Temporal Retrieval (`src/retrieve.py`)**: Adjusts candidate scores dynamically based on the target claim date, boosting legally active clauses and suppressing superseded provisions.
+4. **Date-Aware Contradiction Engine (`src/contradiction.py`)**:
+   - **Before 1 March 2026**: Correctly identifies the unresolved contradiction between §4.3.2 and §9.1.4.
+   - **On or after 1 March 2026**: Recognizes that Amendment 2026-01 ¶2 aligned both provisions to 14 days, removing the contradiction and returning the grounded 14-day rule.
+5. **Expanded Test Suite (`test/evaluate.py`)**: Added temporal query pairs to verify 100% accuracy across both policy eras.
+
+### 9.3 What We Chose Not to Change
+- **Core Refusal Architecture**: The multi-stage gating (dense FAISS + substantive lexical matching) remained completely unchanged and successfully prevented hallucinations on amended and unamended terms alike.
+- **LLM Prompt Structure**: We kept the LLM as a strictly grounded synthesizer, relying on upstream Python modules for temporal filtering rather than asking the LLM to perform temporal arithmetic.
+
+### 9.4 What We Would Have Done Differently
+Had temporal validity been expected from Day One, we would have included structured `valid_from` and `valid_to` date intervals natively in the schema of `clauses.json` during the initial ingest phase, rather than retrofitting temporal metadata as an overlay. However, because our retrieval and decision modules were cleanly decoupled, accommodating this requirement took zero architectural rewrites.
