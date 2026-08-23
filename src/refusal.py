@@ -2,7 +2,7 @@
 from typing import List
 
 # Similarity thresholds
-ANSWER_THRESHOLD = 0.60
+ANSWER_THRESHOLD = 0.50
 AMBIGUOUS_THRESHOLD = 0.45
 
 

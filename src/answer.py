@@ -26,8 +26,11 @@ def generate_answer(question: str, retrieved_clauses: list):
     for clause in retrieved_clauses:
         context += f"{clause['clause_id']}: {clause['text']}\n\n"
 
+    # Default to available Groq chat model or override via GROQ_MODEL in .env
+    model_name = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=model_name,
         temperature=0.1,
         messages=[
             {
