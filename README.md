@@ -107,18 +107,20 @@ grounded-answer/
 git clone https://github.com/vecodesh/grounded-answer.git
 cd grounded-answer
 
-# Create and activate a virtual environment
-# On Linux / macOS:
+# Create and activate a virtual environment:
+
+# Option A: On Linux / macOS
 python3 -m venv venv
 source venv/bin/activate
 
-# On Windows (PowerShell):
+# Option B: On Windows (PowerShell)
 python -m venv venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 .\venv\Scripts\Activate.ps1
 
-# On Windows (Command Prompt):
+# Option C: On Windows (Command Prompt / CMD)
 python -m venv venv
-.\venv\Scripts\activate.bat
+venv\Scripts\activate.bat
 ```
 
 ### 3. Install Dependencies
