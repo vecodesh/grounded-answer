@@ -26,6 +26,7 @@ During development, AI assistants (Antigravity coding assistant) were employed f
 1. **Scaffolding & Boilerplate**: Generating initial CLI skeletons using `typer` and vector pipeline helpers.
 2. **Corpus Exploration**: Assisting in parsing Markdown headers, clause delimiters, and Amendment No. 2026-01 provisions for `src/ingest.py`.
 3. **Test Case Synthesis**: Formulating a balanced 12-question evaluation dataset (`test/test_questions.json`) designed to stress-test direct answers, boundary conditions, pre/post amendment dates, policy gaps, and internal contradictions.
+4. **Engineering & Debugging Support**: AI assistants were also used during development for debugging, retrieval/evidence-gating calibration, contradiction-detection logic, temporal reasoning implementation, code review, documentation, and evaluation analysis. All generated or suggested code was reviewed, tested, modified where necessary, and verified by the author.
 
 ---
 
@@ -53,5 +54,5 @@ Additionally:
 
 All automated components and test suites underwent rigorous manual validation:
 - Every clause cited in the test suite was manually checked against `data/policy-manual.md` and `data/amendment-2026-01.md`.
-- Contradiction triggers between §4.3.2 (10 days) and §9.1.4 (14 days) for pre-March 2026 claims and their harmonization under Amendment No. 2026-01 for post-March 2026 claims were verified by inspecting the ground-truth manual and amendment text.
+- Contradiction triggers between §4.3.2 (10 days) and §9.1.4 (30 days) for pre-March 2026 claims and their harmonization under Amendment No. 2026-01 (14 days) for post-March 2026 claims were verified by inspecting the ground-truth manual and amendment text.
 - Refusal cases on unmentioned subjects ("childcare vouchers", "transport allowance") were validated to confirm that the system cleanly rejects queries lacking substantive evidence rather than returning adjacent benefit sections.

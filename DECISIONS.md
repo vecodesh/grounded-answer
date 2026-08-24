@@ -102,12 +102,14 @@ Setting the refusal threshold is an engineering and ethical balance:
 ## 4. Explicit Contradiction Detection
 
 ### The Corpus Inconsistency
-The Calder County Policy Manual contains a genuine internal contradiction:
+The Calder County Policy Manual contains a genuine internal contradiction in its base text:
 - **§4.3.2**: Requires recipients to report changes of address or circumstance within **10 calendar days**.
-- **§9.1.4**: Mandates reporting of changes in circumstances within **14 calendar days**.
+- **§9.1.4**: References reporting changes in circumstances within **30 calendar days** (conflicting with §4.3.2).
+
+*(Note: On Day 2, Amendment No. 2026-01 ¶2 aligned both provisions to **14 calendar days** for changes occurring on or after 1 March 2026).*
 
 ### Why Naive RAG Fails Here
-A conventional RAG pipeline retrieves whichever clause happens to have a marginally higher vector score and answers with either "10 days" or "14 days", misleading the caseworker.
+A conventional RAG pipeline retrieves whichever clause happens to have a marginally higher vector score and answers with either "10 days" or "30 days", misleading the caseworker.
 
 ### Our Strategy (`src/contradiction.py`)
 1. **Clause Feature Extraction**: Automatically extracts explicit numeric deadlines and time units (calendar days vs. working days) using structured regex matching.
