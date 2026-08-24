@@ -115,8 +115,7 @@ source venv/bin/activate
 
 # Option B: On Windows (PowerShell)
 python -m venv venv
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
-.\venv\Scripts\Activate.ps1
+(Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& .\venv\Scripts\Activate.ps1)
 
 # Option C: On Windows (Command Prompt / CMD)
 python -m venv venv
